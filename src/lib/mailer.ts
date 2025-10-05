@@ -25,8 +25,9 @@ export async function sendEmailPin(
       secure: port === 465, // SSL for 465, TLS for 587
       auth: { user, pass },
     });
-  } catch (err: any) {
-    console.error('[MAILER] Failed to create transporter:', err?.message || err);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[MAILER] Failed to create transporter:', message);
     return;
   }
 
@@ -37,7 +38,8 @@ export async function sendEmailPin(
   try {
     const info = await transporter.sendMail({ from, to, subject, text });
     console.log(`[MAILER] Email sent to ${to}. Message ID: ${info.messageId}`);
-  } catch (err: any) {
-    console.error('[MAILER] Failed to send email:', err?.message || err);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[MAILER] Failed to send email:', message);
   }
 }
