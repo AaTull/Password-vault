@@ -1,103 +1,180 @@
-import Image from "next/image";
+"use client";
+import { useState } from 'react';
+import PasswordGenerator from '@/components/PasswordGenerator';
+import VaultManager from '@/components/VaultManager';
+import ThemeToggle from '@/components/ThemeToggle';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userPassword, setUserPassword] = useState('');
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [pin, setPin] = useState('');
+  const [awaitingPin, setAwaitingPin] = useState<null | 'login' | 'register'>(null);
+  const [statusMsg, setStatusMsg] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleAuth = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  try {
+    const response = await fetch(`/api/auth/${authMode}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setAwaitingPin(authMode);
+      setStatusMsg('We sent a 6-digit PIN to your email. Enter it below.');
+    } else {
+      alert(data.error || 'Authentication failed');
+    }
+  } catch (error) {
+    console.error('Auth error:', error);
+    alert('Network error. Please try again.');
+  }
+};
+
+  const verifyPin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!awaitingPin) return;
+    setStatusMsg('');
+    try {
+      if (awaitingPin === 'register') {
+        const res = await fetch('/api/auth/register/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: credentials.email, pin })
+        });
+        const d = await res.json();
+        if (res.ok) {
+          setStatusMsg('Registration successful! Please login.');
+          setAwaitingPin(null);
+          setPin('');
+          setAuthMode('login');
+        } else {
+          setStatusMsg(d?.error || 'Invalid PIN');
+        }
+      } else {
+        const res = await fetch('/api/auth/login/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: credentials.email, pin })
+        });
+        const d = await res.json();
+        if (res.ok) {
+          localStorage.setItem('authToken', d.token);
+          setUserPassword(credentials.password);
+          setIsAuthenticated(true);
+          setAwaitingPin(null);
+          setPin('');
+        } else {
+          setStatusMsg(d?.error || 'Invalid PIN');
+        }
+      }
+    } catch (err) {
+      console.error('PIN verify error', err);
+      setStatusMsg('Network error. Try again.');
+    }
+  };
+
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative">
+        <div className="absolute top-4 right-4"><ThemeToggle /></div>
+        <div className="max-w-md w-full p-8 rounded-xl shadow-lg bg-[var(--card)] border border-[var(--border)]">
+          <h1 className="text-2xl font-semibold text-center mb-6">Password Vault</h1>
+          
+          <form onSubmit={handleAuth} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              value={credentials.email}
+              onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+              className="w-full p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <input
+              type="password"
+              placeholder="Password"
+              value={credentials.password}
+              onChange={(e) => setCredentials({...credentials, password: e.target.value})}
+              className="w-full p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-500 transition-colors"
+            >
+              {authMode === 'login' ? 'Login' : 'Register'}
+            </button>
+          </form>
+          
+          <p className="text-center mt-4 text-[var(--muted)]">
+            {authMode === 'login' ? "Don't have an account?" : "Already have an account?"}
+            <button
+              onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+              className="text-indigo-600 hover:text-indigo-500 ml-1"
+            >
+              {authMode === 'login' ? 'Register' : 'Login'}
+            </button>
+          </p>
+
+          {awaitingPin && (
+            <div className="mt-6 p-4 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+              <h2 className="text-lg font-medium mb-2">Enter Email PIN</h2>
+              <p className="text-sm text-[var(--muted)] mb-3">{statusMsg}</p>
+              <form onSubmit={verifyPin} className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="6-digit PIN"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  className="flex-1 p-2 rounded bg-[var(--card)] border border-[var(--border)] placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+                <button type="submit" className="px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500">Verify</button>
+              </form>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <nav className="sticky top-0 z-10 backdrop-blur p-4 bg-[var(--nav)] border-b border-[var(--border)]">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-semibold">Password Vault</h1>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <button
+              onClick={() => {
+                localStorage.removeItem('authToken');
+                setIsAuthenticated(false);
+              }}
+              className="text-red-600 hover:text-red-500"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+      
+      <div className="p-6">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
+          <PasswordGenerator />
+          <div className="hidden md:block" />
+        </div>
+        <div className="max-w-6xl mx-auto mt-8">
+          <VaultManager userPassword={userPassword} />
+        </div>
+      </div>
     </div>
   );
 }
